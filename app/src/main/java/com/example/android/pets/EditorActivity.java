@@ -27,9 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import static com.example.android.pets.data.PetsContract.petsEntry.GENDER_FEMALE;
-import static com.example.android.pets.data.PetsContract.petsEntry.GENDER_MALE;
-import static com.example.android.pets.data.PetsContract.petsEntry.GENDER_UNKNOWN;
+import static com.example.android.pets.data.PetsContract.petsEntry.*;
 
 /**
  * Allows user to create a new pet or edit an existing one.
