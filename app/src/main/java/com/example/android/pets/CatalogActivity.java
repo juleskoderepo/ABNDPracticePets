@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract.petsEntry;
 import com.example.android.pets.data.PetDbHelper;
@@ -38,8 +39,7 @@ import com.example.android.pets.data.PetDbHelper;
  */
 public class CatalogActivity extends AppCompatActivity {
 
-    // Database helper that provides access to the database
-    PetDbHelper mDbHelper = new PetDbHelper(this);
+    PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,17 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
+        // Database helper that provides access to the database
+        mDbHelper = new PetDbHelper(this);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         displayDatabaseInfo();
+
+
     }
 
     /**
@@ -112,7 +122,9 @@ public class CatalogActivity extends AppCompatActivity {
 
         Log.i("CatalogActivity","DB name: " + db.toString());
 
-        db.insert(petsEntry.TABLE_NAME, null, values);
+        // insert method will either return the id of the row inserted or -1 if
+        // there is an error
+        long newRowId = db.insert(petsEntry.TABLE_NAME, null, values);
 
     }
 

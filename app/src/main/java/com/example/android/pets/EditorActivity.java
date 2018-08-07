@@ -15,10 +15,13 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +29,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.example.android.pets.data.PetDbHelper;
+import com.example.android.pets.data.PetsContract.petsEntry;
 import static com.example.android.pets.data.PetsContract.petsEntry.*;
 
 /**
@@ -51,6 +57,10 @@ public class EditorActivity extends AppCompatActivity {
      * 0 for unknown gender, 1 for male, 2 for female.
      */
     private int mGender = GENDER_UNKNOWN;
+
+    // Database helper that provides access to the database
+    PetDbHelper mDbHelper = new PetDbHelper(this);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +115,40 @@ public class EditorActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Helper method to insert hardcoded pet data into the database. For debugging purposes only.
+     */
+    private void insertPet(){
+        // Get the database in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Get text from EditText fields, convert it to a String, and remove all leading
+        // and trailing whitespace.
+        String petName = mNameEditText.getText().toString().trim();
+        String petBreed = mBreedEditText.getText().toString().trim();
+        int petGender = mGender;
+        int petWeight = Integer.parseInt(mWeightEditText.getText().toString().trim());
+
+        // Create a map of key-value pairs
+        ContentValues values = new ContentValues();
+        values.put(petsEntry.COLUMN_PET_NAME,petName);
+        values.put(petsEntry.COLUMN_PET_BREED,petBreed);
+        values.put(petsEntry.COLUMN_PET_GENDER,petGender);
+        values.put(petsEntry.COLUMN_PET_WEIGHT,petWeight);
+
+        // Insert new row of values. Row ID returned or -1, on error.
+        long newRowId = db.insert(petsEntry.TABLE_NAME, null, values);
+
+        // Show toast if error on insert or row inserted successfully
+        if(newRowId == -1){
+            Toast.makeText(this, "Error with saving pet.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this,"Pet saved with id: " + newRowId, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_editor.xml file.
@@ -119,7 +163,10 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing for now
+                // Insert pet in table
+                insertPet();
+                // Exit to Activity
+                finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
