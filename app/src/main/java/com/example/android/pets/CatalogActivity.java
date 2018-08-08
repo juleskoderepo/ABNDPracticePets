@@ -101,8 +101,30 @@ public class CatalogActivity extends AppCompatActivity {
                     petsEntry.COLUMN_PET_GENDER + " - " +
                     petsEntry.COLUMN_PET_WEIGHT + "\n\n");
 
-            
+            // Get index positions for each column
+            int idColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_ID);
+            int nameColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_BREED);
+            int genderColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_GENDER);
+            int weightColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_WEIGHT);
 
+            // Loop through all rows in the cursor, return column values, and display values
+            // on screen.
+            while (cursor.moveToNext()){
+                // Extract values from each row using the defined column indices
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentName = cursor.getString(nameColumnIndex);
+                String currentBreed = cursor.getString(breedColumnIndex);
+                int currentGender = cursor.getInt(genderColumnIndex);
+                int currentWeight = cursor.getInt(weightColumnIndex);
+
+                // Append values to the display view
+                displayView.append(currentID + " - " +
+                        currentName + " - " +
+                        currentBreed + " - " +
+                        currentGender + " - " +
+                        currentWeight + "\n");
+            }
 
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
