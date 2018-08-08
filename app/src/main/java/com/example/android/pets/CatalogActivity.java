@@ -118,12 +118,30 @@ public class CatalogActivity extends AppCompatActivity {
                 int currentGender = cursor.getInt(genderColumnIndex);
                 int currentWeight = cursor.getInt(weightColumnIndex);
 
+                // Translate the gender value to the string readable equivalent
+                String currentGenderStr;
+
+                switch(currentGender){
+                    case 0:
+                        currentGenderStr = "Unknown";
+                        break;
+                    case 1:
+                        currentGenderStr = "Male";
+                        break;
+                    case 2:
+                        currentGenderStr = "Female";
+                        break;
+                    default:
+                        currentGenderStr = "Unknown";
+                        break;
+                }
+
                 // Append values to the display view
                 displayView.append(currentID + " - " +
                         currentName + " - " +
                         currentBreed + " - " +
-                        currentGender + " - " +
-                        currentWeight + "\n");
+                        currentGenderStr + " - " +
+                        currentWeight + "kg" + "\n");
             }
 
         } finally {
