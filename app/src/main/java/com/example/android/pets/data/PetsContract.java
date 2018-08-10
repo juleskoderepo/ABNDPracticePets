@@ -1,8 +1,19 @@
 package com.example.android.pets.data;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 public final class PetsContract {
+
+    // Empty constructor to prevent instantiating the contract class
+    private PetsContract() {}
+
+    // Content authority for URI
+    public static final String CONTENT_AUTHORITY = "com.example.android.pets";
+    // Base to use for all Content URIs. Concatenate scheme and content authority
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    // Path to the type of data i.e. table name
+    public static final String PATH_PETS = "pets";
 
     /* Inner class that defines the contents of the pets table */
     public static final class petsEntry implements BaseColumns {
@@ -35,6 +46,9 @@ public final class PetsContract {
 
         // Constant for female
         public static final int GENDER_FEMALE = 2;
+
+        // Constant for Content URI
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI,PATH_PETS);
 
     }
 }
