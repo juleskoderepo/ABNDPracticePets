@@ -116,7 +116,7 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     /**
-     * Helper method to insert hardcoded pet data into the database. For debugging purposes only.
+     * Helper method to insert pet data into the database.
      */
     private void insertPet(){
         // Get the database in write mode
