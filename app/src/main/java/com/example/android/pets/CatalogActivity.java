@@ -74,20 +74,19 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        PetDbHelper mDbHelper = new PetDbHelper(this);
+        // Declare and assign values for parameters needed for query method
+        String[] projection = null;
+        String selection = null;
+        String[] selectionArgs = null;
+        String sortOrder = null;
 
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-        // Define a projection of columns, if needed
-
-        // Filter results with selection and selectionArgs, if needed
-
-        // Define the db query to get a Cursor that contains all the rows from the pets
-        // table to mimic the previous rawQuery
-        Cursor cursor = db.query(petsEntry.TABLE_NAME,null,null,null,null,null,null);
+        // Call the Content Resolver, that will call the PetsProvider to query the database
+        // and return a Cursor.
+        Cursor cursor = getContentResolver().query(petsEntry.CONTENT_URI,
+                projection, // columns to return
+                selection, // selection criteria, i.e. WHERE
+                selectionArgs, // values for selection criteria
+                sortOrder); // sort order for rows returned
 
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
