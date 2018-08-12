@@ -109,7 +109,29 @@ public class PetProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
-        return null;
+
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case PETS:
+                return insertPet(uri, contentValues);
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Helper method
+     * @param uri URI to the pets table
+     * @param contentValues Values to be inserted into the database table
+     * @return New URI with the ID assigned to the new row
+     */
+    private Uri insertPet(Uri uri, ContentValues contentValues){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        long newRowId = db.insert(petsEntry.TABLE_NAME,null,contentValues);
+
+        // return the new URI with the ID assigned to the new row
+        return ContentUris.withAppendedId(uri,newRowId);
     }
 
     /**

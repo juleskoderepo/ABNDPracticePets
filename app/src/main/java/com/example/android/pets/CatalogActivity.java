@@ -19,6 +19,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -159,28 +160,6 @@ public class CatalogActivity extends AppCompatActivity {
         return true;
     }
 
-    /**
-     * Helper method to insert hardcoded pet data into the database. For debugging purposes only.
-     */
-    private void insertPet(){
-        // Get the database in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(petsEntry.COLUMN_PET_NAME,"Toto");
-        values.put(petsEntry.COLUMN_PET_BREED,"Terrier");
-        values.put(petsEntry.COLUMN_PET_GENDER,petsEntry.GENDER_MALE);
-        values.put(petsEntry.COLUMN_PET_WEIGHT,7);
-
-        Log.i("CatalogActivity","Content Values: " + values);
-
-        Log.i("CatalogActivity","DB name: " + db.toString());
-
-        // insert method will either return the id of the row inserted or -1 if
-        // there is an error
-        long newRowId = db.insert(petsEntry.TABLE_NAME, null, values);
-
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -189,6 +168,7 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertPet();
+                Toast.makeText(this,"Pet saved",Toast.LENGTH_LONG).show();
                 displayDatabaseInfo();
 
                 return true;
@@ -199,4 +179,22 @@ public class CatalogActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * Helper method to insert hardcoded pet data into the database. For debugging purposes only.
+     */
+    private void insertPet(){
+        ContentValues values = new ContentValues();
+        values.put(petsEntry.COLUMN_PET_NAME,"Toto");
+        values.put(petsEntry.COLUMN_PET_BREED,"Terrier");
+        values.put(petsEntry.COLUMN_PET_GENDER,petsEntry.GENDER_MALE);
+        values.put(petsEntry.COLUMN_PET_WEIGHT,7);
+
+        Log.i("CatalogActivity","Content Values: " + values);
+
+        // Call the ContentResolver to insert values into the database table
+        Uri uri = getContentResolver().insert(petsEntry.CONTENT_URI,values);
+
+    }
+
 }
