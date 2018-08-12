@@ -135,9 +135,9 @@ public class EditorActivity extends AppCompatActivity {
 
         // Show toast if error on insert or row inserted successfully
         if(uri == null){
-            Toast.makeText(this, "Error with saving pet.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_saving_pet), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this,"Pet saved", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,getString(R.string.pet_saved), Toast.LENGTH_LONG).show();
         }
 
     }

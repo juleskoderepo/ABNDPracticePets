@@ -123,16 +123,16 @@ public class CatalogActivity extends AppCompatActivity {
 
                 switch(currentGender){
                     case 0:
-                        currentGenderStr = "Unknown";
+                        currentGenderStr = getString(R.string.gender_unknown);
                         break;
                     case 1:
-                        currentGenderStr = "Male";
+                        currentGenderStr = getString(R.string.gender_male);
                         break;
                     case 2:
-                        currentGenderStr = "Female";
+                        currentGenderStr = getString(R.string.gender_female);
                         break;
                     default:
-                        currentGenderStr = "Unknown";
+                        currentGenderStr = getString(R.string.gender_unknown);
                         break;
                 }
 
@@ -168,7 +168,7 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertPet();
-                Toast.makeText(this,"Pet saved",Toast.LENGTH_LONG).show();
+                Toast.makeText(this,getString(R.string.pet_saved),Toast.LENGTH_LONG).show();
                 displayDatabaseInfo();
 
                 return true;
