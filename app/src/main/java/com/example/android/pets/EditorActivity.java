@@ -121,7 +121,8 @@ public class EditorActivity extends AppCompatActivity {
         String petName = mNameEditText.getText().toString().trim();
         String petBreed = mBreedEditText.getText().toString().trim();
         int petGender = mGender;
-        int petWeight = Integer.parseInt(mWeightEditText.getText().toString().trim());
+        String weightStr = mWeightEditText.getText().toString().trim();
+        Integer petWeight = Integer.parseInt(weightStr);
 
         // Create a map of key-value pairs
         ContentValues values = new ContentValues();
@@ -131,10 +132,12 @@ public class EditorActivity extends AppCompatActivity {
         values.put(petsEntry.COLUMN_PET_WEIGHT,petWeight);
 
         // Insert new row of values. Row ID returned or -1, on error.
-        Uri uri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
+        Uri newUri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
+
+        // TODO: Get the ID returned in the newUri to determine if the insert actually succeeded
 
         // Show toast if error on insert or row inserted successfully
-        if(uri == null){
+        if(newUri == null){
             Toast.makeText(this, getString(R.string.error_saving_pet), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this,getString(R.string.pet_saved), Toast.LENGTH_LONG).show();

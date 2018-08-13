@@ -50,5 +50,14 @@ public final class PetsContract {
         // Constant for Content URI
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI,PATH_PETS);
 
+        // Returns whether or not the givien gender is valid
+        public static boolean isValidGender (int gender){
+            if(gender == GENDER_UNKNOWN || gender == GENDER_MALE || gender == GENDER_FEMALE){
+                return true;
+            } else {
+                return false;
+            }
+
+        }
     }
 }
