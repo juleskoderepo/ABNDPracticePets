@@ -25,4 +25,13 @@
 
     <!-- Primary dark color for the editor -->
     <color name="editorColorPrimaryDark">#394450</color>
+
+    <!-- Name text color for the catalog -->
+    <color name="catalogNameTextColor">#2B3D4D</color>
+
+    <!-- Summary text color for the catalog -->
+    <color name="catalogSummaryTextColor">#AEB6BD</color>
+
+    <!-- Text color for empty view subtitle text -->
+    <color name="subtitle_text_color">#A2AAB0</color>
 </resources>

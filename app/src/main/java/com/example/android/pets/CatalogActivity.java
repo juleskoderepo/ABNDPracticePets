@@ -27,12 +27,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract.petsEntry;
 import com.example.android.pets.data.PetDbHelper;
-
 
 
 /**
@@ -57,6 +57,13 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
+        // Find ListView to populate
+        ListView petListView = findViewById(R.id.list);
+
+        // Find and set the empty view on the list view when there are no items in the list
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
+
         // Database helper that provides access to the database
         mDbHelper = new PetDbHelper(this);
 
@@ -66,8 +73,6 @@ public class CatalogActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         displayDatabaseInfo();
-
-
     }
 
     /**
@@ -89,66 +94,12 @@ public class CatalogActivity extends AppCompatActivity {
                 selectionArgs, // values for selection criteria
                 sortOrder); // sort order for rows returned
 
-        try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // pets table in the database).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            displayView.setText("The pets table contains " + cursor.getCount() + " pets. \n\n");
-
-            displayView.append(petsEntry.COLUMN_ID + " - " +
-                    petsEntry.COLUMN_PET_NAME + " - " +
-                    petsEntry.COLUMN_PET_BREED + " - " +
-                    petsEntry.COLUMN_PET_GENDER + " - " +
-                    petsEntry.COLUMN_PET_WEIGHT + "\n\n");
-
-            // Get index positions for each column
-            int idColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_ID);
-            int nameColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_NAME);
-            int breedColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_BREED);
-            int genderColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_GENDER);
-            int weightColumnIndex = cursor.getColumnIndex(petsEntry.COLUMN_PET_WEIGHT);
-
-            // Loop through all rows in the cursor, return column values, and display values
-            // on screen.
-            while (cursor.moveToNext()){
-                // Extract values from each row using the defined column indices
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                String currentBreed = cursor.getString(breedColumnIndex);
-                int currentGender = cursor.getInt(genderColumnIndex);
-                int currentWeight = cursor.getInt(weightColumnIndex);
-
-                // Translate the gender value to the string readable equivalent
-                String currentGenderStr;
-
-                switch(currentGender){
-                    case 0:
-                        currentGenderStr = getString(R.string.gender_unknown);
-                        break;
-                    case 1:
-                        currentGenderStr = getString(R.string.gender_male);
-                        break;
-                    case 2:
-                        currentGenderStr = getString(R.string.gender_female);
-                        break;
-                    default:
-                        currentGenderStr = getString(R.string.gender_unknown);
-                        break;
-                }
-
-                // Append values to the display view
-                displayView.append(currentID + " - " +
-                        currentName + " - " +
-                        currentBreed + " - " +
-                        currentGenderStr + " - " +
-                        currentWeight + "kg" + "\n");
-            }
-
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
+            // Find ListView to populate
+            ListView petListView = findViewById(R.id.list);
+            // Set up cursor adapter using cursor
+            PetCursorAdapter cursorAdapter = new PetCursorAdapter(this, cursor, 0);
+            // Attach cursor adapter to ListView
+            petListView.setAdapter(cursorAdapter);
     }
 
 
@@ -168,7 +119,7 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertPet();
-                Toast.makeText(this,getString(R.string.pet_saved),Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.pet_saved), Toast.LENGTH_LONG).show();
                 displayDatabaseInfo();
 
                 return true;
@@ -176,8 +127,8 @@ public class CatalogActivity extends AppCompatActivity {
             case R.id.action_delete_all_entries:
                 // Respond to a click on the "Delete All Pets" menu option
                 int rowsDeleted = getContentResolver().delete(petsEntry.CONTENT_URI,
-                        String.valueOf(1),null);
-                Toast.makeText(this,getString(R.string.rows_deleted) + rowsDeleted,
+                        String.valueOf(1), null);
+                Toast.makeText(this, getString(R.string.rows_deleted) + rowsDeleted,
                         Toast.LENGTH_LONG).show();
                 displayDatabaseInfo();
 
@@ -189,17 +140,17 @@ public class CatalogActivity extends AppCompatActivity {
     /**
      * Helper method to insert hardcoded pet data into the database. For debugging purposes only.
      */
-    private void insertPet(){
+    private void insertPet() {
         ContentValues values = new ContentValues();
-        values.put(petsEntry.COLUMN_PET_NAME,"Toto");
-        values.put(petsEntry.COLUMN_PET_BREED,"Terrier");
-        values.put(petsEntry.COLUMN_PET_GENDER,petsEntry.GENDER_MALE);
-        values.put(petsEntry.COLUMN_PET_WEIGHT,7);
+        values.put(petsEntry.COLUMN_PET_NAME, "Toto");
+        values.put(petsEntry.COLUMN_PET_BREED, "Terrier");
+        values.put(petsEntry.COLUMN_PET_GENDER, petsEntry.GENDER_MALE);
+        values.put(petsEntry.COLUMN_PET_WEIGHT, 7);
 
-        Log.i("CatalogActivity","Content Values: " + values);
+        Log.i("CatalogActivity", "Content Values: " + values);
 
         // Call the ContentResolver to insert values into the database table
-        Uri uri = getContentResolver().insert(petsEntry.CONTENT_URI,values);
+        Uri uri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
 
     }
 
