@@ -28,6 +28,8 @@ public class PetProvider extends ContentProvider {
     private static final String GENDER_EXCEPTION = "Pet requires a valid gender";
     private static final String WEIGHT_EXCEPTION = "Pet requires a valid weight";
 
+    private static final String QUERY_EXCEPTION = "Cannot query unknown URI ";
+    private static final String INSERT_NOT_SUPPORTED_EXCEPTION = "Insertion is not supported for ";
     private static final String UPDATE_EXCEPTION = "Update is not supported for ";
     private static final String DELETE_EXCEPTION = "Deletion is not supported for ";
 
@@ -100,7 +102,7 @@ public class PetProvider extends ContentProvider {
                         null, null, sortOrder);
                 break;
             default:
-                throw new IllegalArgumentException("Cannot query unknown URI " + uri);
+                throw new IllegalArgumentException(QUERY_EXCEPTION + uri);
         }
         return cursor;
     }
@@ -111,7 +113,15 @@ public class PetProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch(match) {
+            case PETS:
+                return petsEntry.CONTENT_LIST_TYPE;
+            case PET_ID:
+                return petsEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalArgumentException("Unknown URI" + uri + " with match " + match);
+        }
     }
 
     /**
@@ -126,12 +136,12 @@ public class PetProvider extends ContentProvider {
             case PETS:
                 return insertPet(uri, contentValues);
             default:
-                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+                throw new IllegalArgumentException(INSERT_NOT_SUPPORTED_EXCEPTION + uri);
         }
     }
 
     /**
-     * Helper method
+     * Helper method to perform db insert
      *
      * @param uri           URI to the pets table
      * @param contentValues Values to be inserted into the database table

@@ -15,6 +15,7 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -122,7 +123,11 @@ public class EditorActivity extends AppCompatActivity {
         String petBreed = mBreedEditText.getText().toString().trim();
         int petGender = mGender;
         String weightStr = mWeightEditText.getText().toString().trim();
-        Integer petWeight = Integer.parseInt(weightStr);
+        /*Integer petWeight = Integer.parseInt(weightStr);*/
+        Integer petWeight = null;
+        if(!weightStr.isEmpty()){
+            petWeight = Integer.parseInt(weightStr);
+        }
 
         // Create a map of key-value pairs
         ContentValues values = new ContentValues();
@@ -131,14 +136,14 @@ public class EditorActivity extends AppCompatActivity {
         values.put(petsEntry.COLUMN_PET_GENDER,petGender);
         values.put(petsEntry.COLUMN_PET_WEIGHT,petWeight);
 
-        // Insert new row of values. Row ID returned or -1, on error.
+        // Insert new row of values. Return new URI.
         Uri newUri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
+        // Parse row ID returned in URI. On insert error, -1 will be returned.
+        long newID = ContentUris.parseId(newUri);
 
-        // TODO: Get the ID returned in the newUri to determine if the insert actually succeeded
-
-        // Show toast if error on insert or row inserted successfully
-        if(newUri == null){
-            Toast.makeText(this, getString(R.string.error_saving_pet), Toast.LENGTH_SHORT).show();
+        // Show toast on insert result
+        if(newUri == null || newID == -1){
+            Toast.makeText(this, getString(R.string.error_saving_pet), Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(this,getString(R.string.pet_saved), Toast.LENGTH_LONG).show();
         }
