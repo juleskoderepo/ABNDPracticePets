@@ -24,18 +24,27 @@ public class PetProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+    private static final String NAME_EXCEPTION = "Pet requires a name";
+    private static final String GENDER_EXCEPTION = "Pet requires a valid gender";
+    private static final String WEIGHT_EXCEPTION = "Pet requires a valid weight";
+
+    private static final String UPDATE_EXCEPTION = "Update is not supported for ";
+
     static {
-        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY,PetsContract.PATH_PETS,PETS);
-        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY,PetsContract.PATH_PETS+"#",PET_ID);
+        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS, PETS);
+        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS + "#", PET_ID);
     }
 
-    /** Tag for log messages */
+    /**
+     * Tag for log messages
+     */
     public static final String LOG_TAG = PetProvider.class.getSimpleName();
 
     PetDbHelper dbHelper;
 
     /**
      * Initialize the provider and the database helper object
+     *
      * @return boolean
      */
     @Override
@@ -64,12 +73,12 @@ public class PetProvider extends ContentProvider {
 
         // Determine if URI matcher can match the URI to a specific code
         int match = sUriMatcher.match(uri);
-        switch (match){
+        switch (match) {
             case PETS:
                 // For the PETS code, query the pets table directly with the given
                 // projection, selection, selection arguments, and sort order. The cursor
                 // could contain multiple rows of the pets table.
-                cursor = db.query(petsEntry.TABLE_NAME, projection, selection, selectionArgs,null,null,sortOrder);
+                cursor = db.query(petsEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 
                 break;
             case PET_ID:
@@ -82,7 +91,7 @@ public class PetProvider extends ContentProvider {
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
                 selection = petsEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the pets table where the _id equals 3 to return a
                 // Cursor containing that row of the table.
@@ -112,7 +121,7 @@ public class PetProvider extends ContentProvider {
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
 
         final int match = sUriMatcher.match(uri);
-        switch (match){
+        switch (match) {
             case PETS:
                 return insertPet(uri, contentValues);
             default:
@@ -122,39 +131,40 @@ public class PetProvider extends ContentProvider {
 
     /**
      * Helper method
-     * @param uri URI to the pets table
+     *
+     * @param uri           URI to the pets table
      * @param contentValues Values to be inserted into the database table
      * @return New URI with the ID assigned to the new row
      */
-    private Uri insertPet(Uri uri, ContentValues contentValues){
+    private Uri insertPet(Uri uri, ContentValues contentValues) {
         // Name should not be null
         String name = contentValues.getAsString(petsEntry.COLUMN_PET_NAME);
         Integer gender = contentValues.getAsInteger(petsEntry.COLUMN_PET_GENDER);
         Integer weight = contentValues.getAsInteger(petsEntry.COLUMN_PET_WEIGHT);
 
-        if(name == null || name.isEmpty()){
-            throw new IllegalArgumentException("Pet requires a name");
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException(NAME_EXCEPTION);
         }
 
-        if(gender == null || !petsEntry.isValidGender(gender)){
-            throw new IllegalArgumentException("Pet requires a valid gender");
+        if (gender == null || !petsEntry.isValidGender(gender)) {
+            throw new IllegalArgumentException(GENDER_EXCEPTION);
         }
 
-        if(weight != null && weight < 0){
-            throw new IllegalArgumentException("Pet requires a valid weight.");
+        if (weight != null && weight < 0) {
+            throw new IllegalArgumentException(WEIGHT_EXCEPTION);
         }
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        long newRowId = db.insert(petsEntry.TABLE_NAME,null,contentValues);
+        long newRowId = db.insert(petsEntry.TABLE_NAME, null, contentValues);
 
         // Log error if newRowId is -1 meaning insert failed
-        if(newRowId == -1){
+        if (newRowId == -1) {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
         }
 
         // return the new URI with the ID assigned to the new row
-        return ContentUris.withAppendedId(uri,newRowId);
+        return ContentUris.withAppendedId(uri, newRowId);
     }
 
     /**
@@ -169,7 +179,66 @@ public class PetProvider extends ContentProvider {
      * Updates the data at the given selection and selection arguments, with the new ContentValues.
      */
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues,
+                      @Nullable String selection,
+                      @Nullable String[] selectionArgs) {
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            case PET_ID:
+                selection = petsEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException(UPDATE_EXCEPTION + uri);
+        }
+    }
+
+    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
+        // If there are no values to update, exit early and return 0
+        if(values.size() == 0){
+            return 0;
+        }
+
+        // Check if the ContentValues object contains each of the pet attributes
+        boolean nameExists = values.containsKey(petsEntry.COLUMN_PET_NAME);
+        boolean genderExists = values.containsKey(petsEntry.COLUMN_PET_GENDER);
+        boolean weightExists = values.containsKey(petsEntry.COLUMN_PET_WEIGHT);
+
+        // Validate the name value if it present in the ContentValues object
+        if (nameExists) {
+            String name = values.getAsString(petsEntry.COLUMN_PET_NAME);
+
+            if (name == null || name.isEmpty()) {
+                throw new IllegalArgumentException(NAME_EXCEPTION);
+            }
+        }
+
+        // Validate the gender value if it present in the ContentValues object
+        if (genderExists) {
+            Integer gender = values.getAsInteger(petsEntry.COLUMN_PET_GENDER);
+
+            if (gender == null || !petsEntry.isValidGender(gender)) {
+                throw new IllegalArgumentException(GENDER_EXCEPTION);
+            }
+        }
+
+        // Validate the weight value if it present in the ContentValues object
+        if (weightExists) {
+            Integer weight = values.getAsInteger(petsEntry.COLUMN_PET_WEIGHT);
+
+            if (weight != null && weight < 0) {
+                throw new IllegalArgumentException(WEIGHT_EXCEPTION);
+            }
+        }
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        return db.update(petsEntry.TABLE_NAME, values, selection, selectionArgs);
+
     }
 }
