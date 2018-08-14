@@ -174,7 +174,13 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                // Respond to a click on the "Delete All Pets" menu option
+                int rowsDeleted = getContentResolver().delete(petsEntry.CONTENT_URI,
+                        String.valueOf(1),null);
+                Toast.makeText(this,getString(R.string.rows_deleted) + rowsDeleted,
+                        Toast.LENGTH_LONG).show();
+                displayDatabaseInfo();
+
                 return true;
         }
         return super.onOptionsItemSelected(item);

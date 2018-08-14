@@ -29,6 +29,7 @@ public class PetProvider extends ContentProvider {
     private static final String WEIGHT_EXCEPTION = "Pet requires a valid weight";
 
     private static final String UPDATE_EXCEPTION = "Update is not supported for ";
+    private static final String DELETE_EXCEPTION = "Deletion is not supported for ";
 
     static {
         sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS, PETS);
@@ -171,8 +172,23 @@ public class PetProvider extends ContentProvider {
      * Delete the data at the given selection and selection arguments.
      */
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int delete(@NonNull Uri uri, @Nullable String selection,
+                      @Nullable String[] selectionArgs) {
+        // Get writeable database
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+        switch(match){
+            case PETS:
+                return db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+            case PET_ID:
+                selection = petsEntry._ID + "=?";;
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+
+                return db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException(DELETE_EXCEPTION + uri);
+        }
     }
 
     /**
