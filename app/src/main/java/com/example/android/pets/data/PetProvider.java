@@ -3,7 +3,6 @@ package com.example.android.pets.data;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -104,6 +103,11 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException(QUERY_EXCEPTION + uri);
         }
+
+        // Set notification URI on the Cursor, so we know what content URI the Cursor
+        // was created for. If the data at this URI changes, then update the Cursor.
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+
         return cursor;
     }
 
@@ -174,6 +178,11 @@ public class PetProvider extends ContentProvider {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
         }
 
+        if(newRowId != -1) {
+            // Notify all listeners that the data has changed for the pet content URI
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
         // return the new URI with the ID assigned to the new row
         return ContentUris.withAppendedId(uri, newRowId);
     }
@@ -190,12 +199,30 @@ public class PetProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch(match){
             case PETS:
-                return db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+                // Perform delete on db that will return number of rows affected
+                int rowsDeleted = db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+
+                if(rowsDeleted != 0) {
+                    // Notify all listeners that the data has changed for the pet content URI
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+
+                // Return number of rows deleted
+                return rowsDeleted;
             case PET_ID:
                 selection = petsEntry._ID + "=?";;
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
-                return db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+                // Perform delete on db for specific row that will return number of rows affected
+                rowsDeleted = db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+
+                if(rowsDeleted != 0){
+                    // Notify all listeners that the data has changed for the pet content URI
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+
+                // Return number of rows deleted
+                return rowsDeleted;
             default:
                 throw new IllegalArgumentException(DELETE_EXCEPTION + uri);
         }
@@ -264,7 +291,16 @@ public class PetProvider extends ContentProvider {
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        return db.update(petsEntry.TABLE_NAME, values, selection, selectionArgs);
+        // Perform update on db that will return number of rows affected
+        int rowsUpdated = db.update(petsEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        if (rowsUpdated != 0) {
+            // Notify all listeners that the data has changed for the pet content URI
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return number of rows updated
+        return rowsUpdated;
 
     }
 }
