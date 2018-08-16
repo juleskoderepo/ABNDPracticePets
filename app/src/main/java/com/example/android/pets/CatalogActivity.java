@@ -48,8 +48,7 @@ public class CatalogActivity extends AppCompatActivity
     PetCursorAdapter cursorAdapter;
 
     private static final int PETAPP_LOADER_ID = 100;
-    private static final String KEY_EXTRA_EDITOR_TITLE = "EXTRA_EDITOR_TITLE";
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
