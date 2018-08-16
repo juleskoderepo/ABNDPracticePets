@@ -76,4 +76,10 @@
     <string name="error_updating_pet">Error updating pet.</string>
 
     <string name="pet_updated">Pet updated</string>
+
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+
+    <string name="discard">Discard</string>
+
+    <string name="keep_editing">Keep Editing</string>
 </resources>
