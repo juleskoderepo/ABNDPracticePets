@@ -99,6 +99,9 @@ public class EditorActivity extends AppCompatActivity
         if(currentPetUri == null){
             // New pet so update the app bar title to "Add a Pet"
             setTitle(getString(R.string.editor_title_add_a_pet));
+            // Invalidate the options menu, so 'Delete' can be hidden since pet hasn't been
+            // created yet.
+            invalidateOptionsMenu();
         } else {
             // Existing pet so update the title to "Edit Pet"
             setTitle(getString(R.string.editor_title_edit_pet));
@@ -268,6 +271,18 @@ public class EditorActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // If this is a new pet; hide the 'Delete' menu item
+        if(currentPetUri == null){
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+
+        return true;
     }
 
     @NonNull
