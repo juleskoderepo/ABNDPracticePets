@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -29,10 +30,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract.petsEntry;
+
+import java.net.URI;
 
 
 /**
@@ -44,6 +48,7 @@ public class CatalogActivity extends AppCompatActivity
     PetCursorAdapter cursorAdapter;
 
     private static final int PETAPP_LOADER_ID = 100;
+    private static final String KEY_EXTRA_EDITOR_TITLE = "EXTRA_EDITOR_TITLE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +76,27 @@ public class CatalogActivity extends AppCompatActivity
         cursorAdapter = new PetCursorAdapter(this, null, 0);
         // Attach cursor adapter to ListView
         petListView.setAdapter(cursorAdapter);
+
+        // Set up item click listener
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                // Create a new intent to launch the EditorActivity
+                Intent openEditor = new Intent(CatalogActivity.this,
+                        EditorActivity.class);
+
+                // Form the content URI to the specific pet.
+                // Append the "id" onto the {@link petsEntry#CONTENT_URI}
+                Uri currentPetUri = ContentUris.withAppendedId(petsEntry.CONTENT_URI, id);
+
+                // Set the URI on the data field of the intent
+                openEditor.setData(currentPetUri);
+
+                // Launch the {@link EditorActivity} to display data for the current pet
+                startActivity(openEditor);
+
+            }
+        });
 
         // Initialize the CursorLoader
         getLoaderManager().initLoader(PETAPP_LOADER_ID, null, this);
