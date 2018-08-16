@@ -32,9 +32,10 @@ public class PetProvider extends ContentProvider {
     private static final String UPDATE_EXCEPTION = "Update is not supported for ";
     private static final String DELETE_EXCEPTION = "Deletion is not supported for ";
 
+    // Set up URI matcher with URI patterns that ContentProvider will accept
     static {
         sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS, PETS);
-        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS + "#", PET_ID);
+        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS + "/#", PET_ID);
     }
 
     /**

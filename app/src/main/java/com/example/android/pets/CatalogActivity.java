@@ -36,7 +36,6 @@ import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract.petsEntry;
 
-import java.net.URI;
 
 
 /**
@@ -47,8 +46,7 @@ public class CatalogActivity extends AppCompatActivity
 
     PetCursorAdapter cursorAdapter;
 
-    private static final int PETAPP_LOADER_ID = 100;
-    private static final String KEY_EXTRA_EDITOR_TITLE = "EXTRA_EDITOR_TITLE";
+    private static final int PETAPP_LOADER_ID = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
