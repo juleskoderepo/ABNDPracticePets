@@ -20,7 +20,6 @@ import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,7 +29,6 @@ import android.support.v4.app.NavUtils;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,7 +38,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.android.pets.data.PetDbHelper;
 import com.example.android.pets.data.PetsContract.petsEntry;
 import static com.example.android.pets.data.PetsContract.petsEntry.*;
 
@@ -147,7 +144,7 @@ public class EditorActivity extends AppCompatActivity
     /**
      * Helper method to insert pet data into the database.
      */
-    private void insertPet(){
+    private void savePet(){
         // Get text from EditText fields, convert it to a String, and remove all leading
         // and trailing whitespace.
         String petName = mNameEditText.getText().toString().trim();
@@ -167,16 +164,31 @@ public class EditorActivity extends AppCompatActivity
         values.put(petsEntry.COLUMN_PET_GENDER,petGender);
         values.put(petsEntry.COLUMN_PET_WEIGHT,petWeight);
 
-        // Insert new row of values. Return new URI.
-        Uri newUri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
-        // Parse row ID returned in URI. On insert error, -1 will be returned.
-        long newID = ContentUris.parseId(newUri);
+        if(currentPetUri == null) {
+            // Insert new row of values. Return new URI.
+            Uri newUri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
+            // Parse row ID returned in URI. On insert error, -1 will be returned.
+            long newID = ContentUris.parseId(newUri);
 
-        // Show toast on insert result
-        if(newUri == null || newID == -1){
-            Toast.makeText(this, getString(R.string.error_saving_pet), Toast.LENGTH_LONG).show();
+            // Show toast on insert result
+            if (newUri == null || newID == -1) {
+                Toast.makeText(this, getString(R.string.error_saving_pet),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, getString(R.string.pet_saved),
+                        Toast.LENGTH_LONG).show();
+            }
         } else {
-            Toast.makeText(this,getString(R.string.pet_saved), Toast.LENGTH_LONG).show();
+            int rowsUpdated = getContentResolver().update(currentPetUri,values,
+                    null,null);
+
+            if(rowsUpdated == 0){
+                Toast.makeText(this,getString(R.string.error_updating_pet),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this,getString(R.string.pet_updated),
+                        Toast.LENGTH_LONG).show();
+            }
         }
 
     }
@@ -197,7 +209,7 @@ public class EditorActivity extends AppCompatActivity
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Insert pet in table
-                insertPet();
+                savePet();
                 // Exit to Activity
                 finish();
                 return true;
@@ -217,6 +229,9 @@ public class EditorActivity extends AppCompatActivity
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        // Best practice: Specify columns to return. There are not may columns in this table
+        // however it is best practice to include the columns to return from the query to
+        // avoid performance issues
         String[] projection = null;
         String selection = null;
         String[] selectionArgs = null;
