@@ -152,9 +152,16 @@ public class EditorActivity extends AppCompatActivity
         int petGender = mGender;
         String weightStr = mWeightEditText.getText().toString().trim();
         /*Integer petWeight = Integer.parseInt(weightStr);*/
-        Integer petWeight = null;
+        Integer petWeight = 0;
         if(!weightStr.isEmpty()){
             petWeight = Integer.parseInt(weightStr);
+        }
+
+        if(currentPetUri == null && petName.isEmpty() && petBreed.isEmpty()
+                && petGender == GENDER_UNKNOWN && weightStr.isEmpty()){
+            Toast.makeText(this,"No data entered. Save unsuccessful",
+                    Toast.LENGTH_LONG).show();
+            return;
         }
 
         // Create a map of key-value pairs
