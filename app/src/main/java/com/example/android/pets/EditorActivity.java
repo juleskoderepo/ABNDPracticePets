@@ -306,35 +306,39 @@ public class EditorActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        // Move cursor to position 0 before extracting values
-        data.moveToFirst();
-
-        // Get name column index and set value on name field
-        int nameColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_NAME);
-        mNameEditText.setText(data.getString(nameColumnIndex));
-        // Get breed column index and set value on breed field
-        int breedColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_BREED);
-        mBreedEditText.setText(data.getString(breedColumnIndex));
-        // Get weight column index and set value on weight field
-        int weightColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_WEIGHT);
-        mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
-        //Get gender column index and set value on gender spinner
-        int genderColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_GENDER);
-        switch(data.getInt(genderColumnIndex)){
-            case petsEntry.GENDER_UNKNOWN:
-                mGenderSpinner.setSelection(0);
-                break;
-            case petsEntry.GENDER_MALE:
-                mGenderSpinner.setSelection(1);
-                break;
-            case petsEntry.GENDER_FEMALE:
-                mGenderSpinner.setSelection(2);
-                break;
-            default:
-                mGenderSpinner.setSelection(0);
-                break;
+        // Exit early if the cursor is null or there is less than 1 row in
+        // the cursor
+        if (data == null || data.getCount() < 1) {
+            return;
         }
-
+        // Move cursor to position 0 before extracting values
+        if (data.moveToFirst()) {
+            // Get name column index and set value on name field
+            int nameColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_NAME);
+            mNameEditText.setText(data.getString(nameColumnIndex));
+            // Get breed column index and set value on breed field
+            int breedColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_BREED);
+            mBreedEditText.setText(data.getString(breedColumnIndex));
+            // Get weight column index and set value on weight field
+            int weightColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_WEIGHT);
+            mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
+            //Get gender column index and set value on gender spinner
+            int genderColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_GENDER);
+            switch (data.getInt(genderColumnIndex)) {
+                case petsEntry.GENDER_UNKNOWN:
+                    mGenderSpinner.setSelection(0);
+                    break;
+                case petsEntry.GENDER_MALE:
+                    mGenderSpinner.setSelection(1);
+                    break;
+                case petsEntry.GENDER_FEMALE:
+                    mGenderSpinner.setSelection(2);
+                    break;
+                default:
+                    mGenderSpinner.setSelection(0);
+                    break;
+            }
+        }
     }
 
     @Override
