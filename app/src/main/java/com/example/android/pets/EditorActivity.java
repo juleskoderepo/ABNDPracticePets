@@ -42,24 +42,33 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract.petsEntry;
+
 import static com.example.android.pets.data.PetsContract.petsEntry.*;
 
 /**
  * Allows user to create a new pet or edit an existing one.
  */
 public class EditorActivity extends AppCompatActivity
-    implements LoaderManager.LoaderCallbacks<Cursor>{
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /** EditText field to enter the pet's name */
+    /**
+     * EditText field to enter the pet's name
+     */
     private EditText mNameEditText;
 
-    /** EditText field to enter the pet's breed */
+    /**
+     * EditText field to enter the pet's breed
+     */
     private EditText mBreedEditText;
 
-    /** EditText field to enter the pet's weight */
+    /**
+     * EditText field to enter the pet's weight
+     */
     private EditText mWeightEditText;
 
-    /** EditText field to enter the pet's gender */
+    /**
+     * EditText field to enter the pet's gender
+     */
     private Spinner mGenderSpinner;
 
     /**
@@ -96,7 +105,7 @@ public class EditorActivity extends AppCompatActivity
         // If the EditorActivity was opened using the ListView item, then we will
         // have uri of pet so change app bar to say "Edit Pet"
         // Otherwise if this is a new pet, uri is null so change app bar to say "Add a Pet"
-        if(currentPetUri == null){
+        if (currentPetUri == null) {
             // New pet so update the app bar title to "Add a Pet"
             setTitle(getString(R.string.editor_title_add_a_pet));
             // Invalidate the options menu, so 'Delete' can be hidden since pet hasn't been
@@ -106,7 +115,7 @@ public class EditorActivity extends AppCompatActivity
             // Existing pet so update the title to "Edit Pet"
             setTitle(getString(R.string.editor_title_edit_pet));
 
-            getLoaderManager().initLoader(EDITOR_LOADER, null,this);
+            getLoaderManager().initLoader(EDITOR_LOADER, null, this);
         }
 
         // Find all relevant views that we will need to read user input from
@@ -166,7 +175,7 @@ public class EditorActivity extends AppCompatActivity
     /**
      * Helper method to insert pet data into the database.
      */
-    private void savePet(){
+    private void savePet() {
         // Get text from EditText fields, convert it to a String, and remove all leading
         // and trailing whitespace.
         String petName = mNameEditText.getText().toString().trim();
@@ -175,25 +184,25 @@ public class EditorActivity extends AppCompatActivity
         String weightStr = mWeightEditText.getText().toString().trim();
         /*Integer petWeight = Integer.parseInt(weightStr);*/
         Integer petWeight = 0;
-        if(!weightStr.isEmpty()){
+        if (!weightStr.isEmpty()) {
             petWeight = Integer.parseInt(weightStr);
         }
 
-        if(currentPetUri == null && petName.isEmpty() && petBreed.isEmpty()
-                && petGender == GENDER_UNKNOWN && weightStr.isEmpty()){
-            Toast.makeText(this,"No data entered. Save unsuccessful",
+        if (currentPetUri == null && petName.isEmpty() && petBreed.isEmpty()
+                && petGender == GENDER_UNKNOWN && weightStr.isEmpty()) {
+            Toast.makeText(this, "No data entered. Save unsuccessful",
                     Toast.LENGTH_LONG).show();
             return;
         }
 
         // Create a map of key-value pairs
         ContentValues values = new ContentValues();
-        values.put(petsEntry.COLUMN_PET_NAME,petName);
-        values.put(petsEntry.COLUMN_PET_BREED,petBreed);
-        values.put(petsEntry.COLUMN_PET_GENDER,petGender);
-        values.put(petsEntry.COLUMN_PET_WEIGHT,petWeight);
+        values.put(petsEntry.COLUMN_PET_NAME, petName);
+        values.put(petsEntry.COLUMN_PET_BREED, petBreed);
+        values.put(petsEntry.COLUMN_PET_GENDER, petGender);
+        values.put(petsEntry.COLUMN_PET_WEIGHT, petWeight);
 
-        if(currentPetUri == null) {
+        if (currentPetUri == null) {
             // Insert new row of values. Return new URI.
             Uri newUri = getContentResolver().insert(petsEntry.CONTENT_URI, values);
             // Parse row ID returned in URI. On insert error, -1 will be returned.
@@ -208,14 +217,14 @@ public class EditorActivity extends AppCompatActivity
                         Toast.LENGTH_LONG).show();
             }
         } else {
-            int rowsUpdated = getContentResolver().update(currentPetUri,values,
-                    null,null);
+            int rowsUpdated = getContentResolver().update(currentPetUri, values,
+                    null, null);
 
-            if(rowsUpdated == 0){
-                Toast.makeText(this,getString(R.string.error_updating_pet),
+            if (rowsUpdated == 0) {
+                Toast.makeText(this, getString(R.string.error_updating_pet),
                         Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this,getString(R.string.pet_updated),
+                Toast.makeText(this, getString(R.string.pet_updated),
                         Toast.LENGTH_LONG).show();
             }
         }
@@ -239,17 +248,18 @@ public class EditorActivity extends AppCompatActivity
             case R.id.action_save:
                 // Insert pet in table
                 savePet();
-                // Exit to Activity
+                // Exit activity
                 finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
+                // Confirm delete with user
+                showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
                 // Navigate back to parent activity (CatalogActivity) if the pet hasn't changed
-                if(!petHasChanged) {
+                if (!petHasChanged) {
                     NavUtils.navigateUpFromSameTask(this);
                     return true;
                 }
@@ -277,7 +287,7 @@ public class EditorActivity extends AppCompatActivity
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         // If this is a new pet; hide the 'Delete' menu item
-        if(currentPetUri == null){
+        if (currentPetUri == null) {
             MenuItem menuItem = menu.findItem(R.id.action_delete);
             menuItem.setVisible(false);
         }
@@ -291,7 +301,12 @@ public class EditorActivity extends AppCompatActivity
         // Best practice: Specify columns to return. There are not may columns in this table
         // however it is best practice to include the columns to return from the query to
         // avoid performance issues
-        String[] projection = null;
+        String[] projection = {
+                petsEntry._ID,
+                petsEntry.COLUMN_PET_NAME,
+                petsEntry.COLUMN_PET_BREED,
+                petsEntry.COLUMN_PET_GENDER,
+                petsEntry.COLUMN_PET_WEIGHT};
         String selection = null;
         String[] selectionArgs = null;
         String sortOrder = null;
@@ -306,35 +321,39 @@ public class EditorActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        // Move cursor to position 0 before extracting values
-        data.moveToFirst();
-
-        // Get name column index and set value on name field
-        int nameColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_NAME);
-        mNameEditText.setText(data.getString(nameColumnIndex));
-        // Get breed column index and set value on breed field
-        int breedColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_BREED);
-        mBreedEditText.setText(data.getString(breedColumnIndex));
-        // Get weight column index and set value on weight field
-        int weightColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_WEIGHT);
-        mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
-        //Get gender column index and set value on gender spinner
-        int genderColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_GENDER);
-        switch(data.getInt(genderColumnIndex)){
-            case petsEntry.GENDER_UNKNOWN:
-                mGenderSpinner.setSelection(0);
-                break;
-            case petsEntry.GENDER_MALE:
-                mGenderSpinner.setSelection(1);
-                break;
-            case petsEntry.GENDER_FEMALE:
-                mGenderSpinner.setSelection(2);
-                break;
-            default:
-                mGenderSpinner.setSelection(0);
-                break;
+        // Exit early if the cursor is null or there is less than 1 row in
+        // the cursor
+        if (data == null || data.getCount() < 1) {
+            return;
         }
-
+        // Move cursor to position 0 before extracting values
+        if (data.moveToFirst()) {
+            // Get name column index and set value on name field
+            int nameColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_NAME);
+            mNameEditText.setText(data.getString(nameColumnIndex));
+            // Get breed column index and set value on breed field
+            int breedColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_BREED);
+            mBreedEditText.setText(data.getString(breedColumnIndex));
+            // Get weight column index and set value on weight field
+            int weightColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_WEIGHT);
+            mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
+            //Get gender column index and set value on gender spinner
+            int genderColumnIndex = data.getColumnIndex(petsEntry.COLUMN_PET_GENDER);
+            switch (data.getInt(genderColumnIndex)) {
+                case petsEntry.GENDER_UNKNOWN:
+                    mGenderSpinner.setSelection(0);
+                    break;
+                case petsEntry.GENDER_MALE:
+                    mGenderSpinner.setSelection(1);
+                    break;
+                case petsEntry.GENDER_FEMALE:
+                    mGenderSpinner.setSelection(2);
+                    break;
+                default:
+                    mGenderSpinner.setSelection(0);
+                    break;
+            }
+        }
     }
 
     @Override
@@ -346,7 +365,7 @@ public class EditorActivity extends AppCompatActivity
     }
 
     private void showUnsavedChangesDialog(
-            DialogInterface.OnClickListener discardButtonClickListener){
+            DialogInterface.OnClickListener discardButtonClickListener) {
         // Create an AlertDialog.Builder and set the message, and click listeners
         // for the positive and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -357,7 +376,7 @@ public class EditorActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int i) {
                 // User clicked the 'Keep editing' button, so dismiss the dialog and
                 // continue editing the pet.
-                if(dialogInterface != null){
+                if (dialogInterface != null) {
                     dialogInterface.dismiss();
                 }
             }
@@ -371,7 +390,7 @@ public class EditorActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         // If the pet hasn't changed, continue with handling back button press
-        if(!petHasChanged){
+        if (!petHasChanged) {
             super.onBackPressed();
             return;
         }
@@ -379,15 +398,64 @@ public class EditorActivity extends AppCompatActivity
         // Otherwise if there are unsaved changes, set up a dialog to the user
         // Create a click listener to handle the user confirming that changes should be discarded.
         DialogInterface.OnClickListener discardButtonClickListener =
-                new DialogInterface.OnClickListener(){
+                new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i){
-                        // User clicked the 'Discard' button, close the currnt activity
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // User clicked the 'Discard' button, close the current activity
                         finish();
                     }
                 };
 
         // Show dialog that there are unsaved changes
         showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the pet.
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Perform the deletion of the pet in the database.
+     */
+    private void deletePet() {
+        if (currentPetUri != null) {
+            int rowDeleted = getContentResolver().delete(currentPetUri,
+                    null,
+                    null);
+
+            // Show toast message if delete failed or was successful
+            if (rowDeleted == 0) {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+
+        // Exit activity
+        finish();
     }
 }

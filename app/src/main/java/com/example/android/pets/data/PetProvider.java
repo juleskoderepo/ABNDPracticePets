@@ -52,7 +52,6 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public boolean onCreate() {
-        // TODO: Create and initialize a PetDbHelper object to gain access to the pets database.
         // Make sure the variable is a global variable, so it can be referenced from other
         // ContentProvider methods.
         dbHelper = new PetDbHelper(getContext());
@@ -196,37 +195,33 @@ public class PetProvider extends ContentProvider {
                       @Nullable String[] selectionArgs) {
         // Get writeable database
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // Number of rows deleted
+        int rowsDeleted;
 
         final int match = sUriMatcher.match(uri);
         switch(match){
             case PETS:
                 // Perform delete on db that will return number of rows affected
-                int rowsDeleted = db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
-
-                if(rowsDeleted != 0) {
-                    // Notify all listeners that the data has changed for the pet content URI
-                    getContext().getContentResolver().notifyChange(uri, null);
-                }
-
-                // Return number of rows deleted
-                return rowsDeleted;
+                rowsDeleted = db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             case PET_ID:
+                // Specify the pet to delete given the ID from the URI
                 selection = petsEntry._ID + "=?";;
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-
                 // Perform delete on db for specific row that will return number of rows affected
                 rowsDeleted = db.delete(petsEntry.TABLE_NAME, selection, selectionArgs);
-
-                if(rowsDeleted != 0){
-                    // Notify all listeners that the data has changed for the pet content URI
-                    getContext().getContentResolver().notifyChange(uri, null);
-                }
-
-                // Return number of rows deleted
-                return rowsDeleted;
+                break;
             default:
                 throw new IllegalArgumentException(DELETE_EXCEPTION + uri);
         }
+
+        // Notify all listeners that the data has changed for the pet content URI
+        // if a row is deleted
+        if(rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        // Return number of rows deleted
+        return rowsDeleted;
     }
 
     /**
